@@ -2,23 +2,26 @@ package ru.job4j.quartz;
 
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 import static org.quartz.JobBuilder.*;
 import static org.quartz.TriggerBuilder.*;
 import static org.quartz.SimpleScheduleBuilder.*;
 
 public class AlertRabbit {
+    private final Properties cfg = new Properties();
+
     public static void main(String[] args) {
+        AlertRabbit ar = new AlertRabbit();
+        ar.readFile();
         try {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDetail job = newJob(Rabbit.class).build();
             SimpleScheduleBuilder times = simpleSchedule()
-                    .withIntervalInSeconds(readFile())
+                    .withIntervalInSeconds(Integer.parseInt(ar.cfg.getProperty("rabbit.interval")))
                     .repeatForever();
             Trigger trigger = newTrigger()
                     .startNow()
@@ -30,19 +33,13 @@ public class AlertRabbit {
         }
     }
 
-    private static int readFile() {
-        int rsl = -1;
-        try (BufferedReader in = new BufferedReader(new FileReader("./src/main/resources/rabbit.properties"))) {
-            String text = in.readLine();
-            String[] arText = text.split("=", 2);
-            rsl = Integer.parseInt(arText[1]);
+    private void readFile() {
+        try (InputStream in = AlertRabbit.class.getClassLoader()
+                .getResourceAsStream("rabbit.properties")) {
+            cfg.load(in);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (rsl <= 0) {
-            throw new IllegalArgumentException("некорректно задан временной интревал");
-        }
-        return rsl;
     }
 
     public static class Rabbit implements Job {
