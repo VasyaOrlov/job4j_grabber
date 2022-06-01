@@ -6,10 +6,25 @@ import java.util.Objects;
 public class Post {
 
     private int id;
-    private String title;
-    private String link;
-    private String description;
-    private LocalDateTime created;
+    private final String title;
+    private final String link;
+    private final String description;
+    private final LocalDateTime created;
+
+    public Post(String title, String link, String description, LocalDateTime created) {
+        this.title = title;
+        this.link = link;
+        this.description = description;
+        this.created = created;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     @Override
     public String toString() {
