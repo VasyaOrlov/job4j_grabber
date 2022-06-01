@@ -27,9 +27,8 @@ public class AlertRabbit {
 
     public static void main(String[] args) {
         AlertRabbit ar = new AlertRabbit();
-        try {
-            ar.readFile();
-            Connection cn = ar.initConnection();
+        ar.readFile();
+        try (Connection cn = ar.initConnection()) {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDataMap data = new JobDataMap();
@@ -50,16 +49,17 @@ public class AlertRabbit {
         } catch (SchedulerException
                  | InterruptedException
                  | SQLException
-                 | IOException
                  | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    private void readFile() throws IOException {
+    private void readFile() {
         try (InputStream in = AlertRabbit.class.getClassLoader()
                 .getResourceAsStream("rabbit.properties")) {
             cfg.load(in);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
