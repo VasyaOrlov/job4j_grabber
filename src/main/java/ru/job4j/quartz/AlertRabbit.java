@@ -15,12 +15,10 @@ import static org.quartz.SimpleScheduleBuilder.*;
 public class AlertRabbit {
     private final Properties cfg = new Properties();
 
-    private Connection cn;
-
-    private void initConnection() throws ClassNotFoundException, SQLException {
+    private Connection initConnection() throws ClassNotFoundException, SQLException {
         String driverClass = cfg.getProperty("jdbc.driver");
         Class.forName(driverClass);
-        this.cn = DriverManager.getConnection(
+        return DriverManager.getConnection(
                 cfg.getProperty("jdbc.url"),
                 cfg.getProperty("jdbc.username"),
                 cfg.getProperty("jdbc.password")
@@ -31,11 +29,11 @@ public class AlertRabbit {
         AlertRabbit ar = new AlertRabbit();
         try {
             ar.readFile();
-            ar.initConnection();
+            Connection cn = ar.initConnection();
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDataMap data = new JobDataMap();
-            data.put("connect", ar.cn);
+            data.put("connect", cn);
             JobDetail job = newJob(Rabbit.class)
                     .usingJobData(data)
                     .build();
