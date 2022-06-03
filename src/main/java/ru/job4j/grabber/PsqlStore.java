@@ -28,7 +28,12 @@ public class PsqlStore implements Store, AutoCloseable {
     @Override
     public void save(Post post) {
         try (PreparedStatement ps = cnn.prepareStatement(
-                "insert into post (name, text, link, created) values (?, ?, ?, ?);"
+                "insert into post (name, text, link, created) values (?, ?, ?, ?) "
+                        + "on conflict (link) "
+                        + "do update set "
+                        + "name = excluded.name,"
+                        + "text = excluded.text,"
+                        + "created = excluded.created;"
         )) {
             ps.setString(1, post.getTitle());
             ps.setString(2, post.getDescription());
@@ -100,8 +105,8 @@ public class PsqlStore implements Store, AutoCloseable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Post post1 = new Post(1, "first", "link1", "this is first post", LocalDateTime.now());
-        Post post2 = new Post(2, "second", "link2", "this is second post", LocalDateTime.now());
+        Post post1 = new Post(1, "first", "this is first post", "link1", LocalDateTime.now());
+        Post post2 = new Post(2, "second", "this is second post", "link2", LocalDateTime.now());
         try (PsqlStore psqlStore = new PsqlStore(config)) {
             psqlStore.save(post1);
             psqlStore.save(post2);
