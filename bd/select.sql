@@ -24,8 +24,8 @@ from person
 join company 
 on company_id = company.id
 group by company.id
-having count(company.id) = (select max(count.count) 
-							from (select count(company_id) 
-								  from person 
-								  group by company_id) 
-							as count);
+having count(company.id) = (select count(company_id)
+							from person
+							group by company_id
+							order by count(company_id) desc
+							limit 1);
