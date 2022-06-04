@@ -54,8 +54,8 @@ public class HabrCareerParse implements Parse {
         }
         return new Post(
                 vacancyName,
-                linkEl,
                 desc,
+                linkEl,
                 dateTimeParser.parse(vacancyData)
         );
     }
